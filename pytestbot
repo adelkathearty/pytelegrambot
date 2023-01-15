@@ -1,0 +1,27 @@
+import telebot
+import csv
+
+bot = telebot.TeleBot("YOUR_API_TOKEN")
+
+# function to save information to csv
+def save_to_csv(data):
+    with open('leads.csv', 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(data)
+
+# handle start and help command
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.send_message(message.chat.id, "Welcome, please tell me your information in the following format: first_name last_name passport_number email phone")
+
+# handle message to save information
+@bot.message_handler(func=lambda message: True)
+def save_info(message):
+    try:
+        first_name, last_name, passport_number, email, phone = message.text.split(" ")
+        save_to_csv([first_name, last_name, passport_number, email, phone])
+        bot.send_message(message.chat.id, "Thank you for your information")
+    except ValueError:
+        bot.send_message(message.chat.id, "Invalid input format, please use the following format: first_name last_name passport_number email phone")
+
+bot.polling()
